@@ -33,6 +33,7 @@ public class BookController {
 
     @GetMapping("/findbyid/{id}")
     public Book geBookById(@PathVariable long id) {
+        System.out.println("Es wurde die ID: " + id + " übergeben");
         return bookServiceImpl.findBookByID(id);
     }
 

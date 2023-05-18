@@ -32,7 +32,7 @@ public class HelloController {
         URI postUri;
 
         try {
-            postUri = new URI("http://localhost:8080/invoices/" + userID);
+            postUri = new URI("http://localhost:8080/findbyid/" + userID);
         } catch (URISyntaxException e) {
             statusLabel.setText("Invalid User-ID");
             return;
@@ -62,7 +62,8 @@ public class HelloController {
         // Build the URI for the GET request
         URI getUri;
         try {
-            getUri = new URI("http://example.com/invoices/" + userID);
+            getUri = new URI("http://localhost:8080/findbyid/" + userID);
+            //getUri = new URI("http://example.com/invoices/" + userID);
         } catch (URISyntaxException e) {
             statusLabel.setText("Invalid user ID");
             return;
