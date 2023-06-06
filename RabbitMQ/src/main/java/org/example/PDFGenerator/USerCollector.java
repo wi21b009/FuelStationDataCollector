@@ -41,5 +41,15 @@ public class USerCollector {
         ps.close();
         con.close();
          */
+
+        PDFGeneratorController pdfGenerator = new PDFGeneratorController();
+
+        // Add test data to the queue
+        pdfGenerator.addToQueue("Testdaten 1");
+        pdfGenerator.addToQueue("Testdaten 2");
+        pdfGenerator.addToQueue("Testdaten 3");
+
+        // Process the queue and generate the PDFs
+        pdfGenerator.processQueue();
     }
 }
