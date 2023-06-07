@@ -1,5 +1,6 @@
 package com.example.fuelstationdatacollector;
 
+import javafx.application.Application;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -12,6 +13,8 @@ import java.net.URISyntaxException;
 import java.net.http.*;
 
 public class HelloController {
+
+
     @FXML
     private TextField UserID;
 
@@ -32,7 +35,8 @@ public class HelloController {
         URI postUri;
 
         try {
-            postUri = new URI("http://localhost:8080/findbyid/" + userID);
+            //postUri = new URI("http://localhost:8080/findbyid/" + userID);
+            postUri = new URI("http://localhost:8080/invoices/" + userID);
         } catch (URISyntaxException e) {
             statusLabel.setText("Invalid User-ID");
             return;
@@ -62,8 +66,8 @@ public class HelloController {
         // Build the URI for the GET request
         URI getUri;
         try {
-            getUri = new URI("http://localhost:8080/findbyid/" + userID);
-            //getUri = new URI("http://example.com/invoices/" + userID);
+            //getUri = new URI("http://localhost:8080/findbyid/" + userID);
+            getUri = new URI("http://localhost:8080/invoices/" + userID);
         } catch (URISyntaxException e) {
             statusLabel.setText("Invalid user ID");
             return;
