@@ -2,7 +2,6 @@ package org.example.DataCollectionReceiver;
 
 import com.rabbitmq.client.*;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -53,13 +52,14 @@ public class DataCollectionReceiver {
                     // Check if JobID already exists in the map
                     JobData jobData = jobDataMap.get(jobID);
                     if (jobData == null) {
-                        jobData = new JobData(userID, jobID);
+                        jobData = new JobData(userID, jobID, numDB); // Pass the numDB to JobData constructor
                         jobDataMap.put(jobID, jobData);
                     }
 
                     // Process the number of databases (numDB) using a for loop
                     for (int i = 0; i < numDB; i++) {
                         final JobData currentJobData = jobData; // Create a final variable
+                        JobData finalJobData = jobData;
                         DeliverCallback deliverCallback2 = (consumerTag2, delivery2) -> {
                             try {
                                 String message2 = new String(delivery2.getBody(), "UTF-8");
@@ -68,6 +68,31 @@ public class DataCollectionReceiver {
                                 currentJobData.addLine(message2);
 
                                 channel.basicAck(delivery2.getEnvelope().getDeliveryTag(), false);
+
+                                // Increment the counter after each received message
+                                currentJobData.incrementCounter();
+
+                                // Check if all messages have been received
+                                if (currentJobData.getCounter() == currentJobData.getNumDB()) {
+                                    System.out.println("All lines received for jobID: " + jobID);
+                                    System.out.println(finalJobData.getMessage());
+
+                                    // Remove the completed JobData from the map if desired
+                                    jobDataMap.remove(jobID);
+
+                                    // Check if JobData has received all expected lines
+                                    if (finalJobData.getLines().size() == numDB) {
+                                        System.out.println("JobData received all lines. Sending to output queue.");
+                                        List<String> lines = finalJobData.getLines();
+                                        for (String line : lines) {
+                                            channel.basicPublish("", OUTPUT_QUEUE_NAME, MessageProperties.PERSISTENT_TEXT_PLAIN, line.getBytes("UTF-8"));
+                                        }
+                                    } else {
+                                        System.out.println("JobData still missing lines. Waiting.");
+                                    }
+                                } else {
+                                    System.out.println("Lines received for jobID: " + jobID + " - " + currentJobData.getCounter() + "/" + currentJobData.getNumDB());
+                                }
                             } catch (Exception ex) {
                                 System.err.println("Exception occurred during message delivery: " + ex.getMessage());
                                 ex.printStackTrace();
@@ -78,21 +103,7 @@ public class DataCollectionReceiver {
                         channel.basicConsume(INPUT_QUEUE_NAME2, autoAck, deliverCallback2, consumerTag2 -> {
                         });
                     }
-
-                    // Check if JobData has received all expected lines
-                    if (jobData.getLines().size() == numDB) {
-                        System.out.println("All lines received for jobID: " + jobID);
-                        System.out.println("jobData.getLines().size(): " + jobData.getLines().size());
-                        System.out.println("numDB: " + numDB);
-                        System.out.println(jobData.getMessage());
-                        // Remove the completed JobData from the map if desired
-                        // jobDataMap.remove(jobID);
-                    } else {
-                        System.out.println("Lines received for jobID: " + jobID + " - " + jobData.getLines().size() + "/" + numDB);
-                    }
-
-                    System.out.println(jobData.getLines().size());
-                    System.out.println(numDB);
+                    System.out.println("End of for loop");
 
                 } catch (Exception ex) {
                     System.err.println("Exception occurred during message delivery: " + ex.getMessage());
@@ -112,39 +123,6 @@ public class DataCollectionReceiver {
                     e.printStackTrace();
                 }
             }
-        }
-    }
-
-    static class JobData {
-        private int userID;
-        private int jobID;
-        private List<String> lines;
-
-        public JobData(int userID, int jobID) {
-            this.userID = userID;
-            this.jobID = jobID;
-            this.lines = new ArrayList<>();
-        }
-
-        public void addLine(String line) {
-            lines.add(line);
-        }
-
-        public List<String> getLines() {
-            return lines;
-        }
-
-        public String getMessage() {
-            StringBuilder sb = new StringBuilder();
-            sb.append("UserID: ").append(userID).append(", JobID: ").append(jobID).append("\n");
-            for (String line : lines) {
-                String[] parts = line.split(",");
-                String id = parts[0].split("=")[1].trim();
-                String kwh = parts[1].split("=")[1].trim();
-                String port = parts[3].split("=")[1].trim();
-                sb.append("ID: ").append(id).append(", kWh: ").append(kwh).append(", Port: ").append(port).append("\n");
-            }
-            return sb.toString();
         }
     }
 }
