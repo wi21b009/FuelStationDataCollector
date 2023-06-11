@@ -29,8 +29,10 @@ public class PDFGeneratorController {
     }
 
     private String generatePDF() {
-        String filePath = "D:/Minor/Distributed_Systems/Semesterprojekt/generatedPDFs/"+fileName+fileID+".pdf"; //eventuell durch getPath methode, damit nicht jeder seinnen Path neu eingeben muss
-        //System.out.println("Path:" + System.getProperty("user.dir"));
+        //String filePath = "D:/Minor/Distributed_Systems/Semesterprojekt/generatedPDFs/"+fileName+fileID+".pdf"; //eventuell durch getPath methode, damit nicht jeder seinnen Path neu eingeben muss
+
+        String filePath = System.getProperty("user.dir") +fileName+fileID+".pdf";
+        System.out.println("Path:" + System.getProperty("user.dir"));
         try {
             PdfWriter writer = new PdfWriter(filePath);
             PdfDocument pdf = new PdfDocument(writer);

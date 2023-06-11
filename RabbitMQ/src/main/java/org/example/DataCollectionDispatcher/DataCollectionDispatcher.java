@@ -22,6 +22,9 @@ public class DataCollectionDispatcher {
         factory.setHost("localhost");
         factory.setPort(30003);
 
+        //little info
+        System.out.println("DataCollectionDispatcher up and running");
+
         try (Connection connection = factory.newConnection();
              Channel channel = connection.createChannel()) {
 
@@ -38,7 +41,7 @@ public class DataCollectionDispatcher {
                     List<Stations> stationsList = StationsCollector.queryDatabase();
 
                     for (Stations station : stationsList) {
-                        String stationMessage = "User{id=" + message + "} | " + station.toString();
+                        String stationMessage = message + " | " + station.toString() + " | " + jobID;
 
                         channel.basicPublish("", GREEN_QUEUE_OUTPUT,
                                 MessageProperties.PERSISTENT_TEXT_PLAIN,
@@ -50,15 +53,15 @@ public class DataCollectionDispatcher {
                         Thread.sleep(2000);
                     }
 
-                    jobID++;
 
-                    String receiverMessage = "JobID=" + jobID + " | UserID=" + message +
-                            " | Number of databases=" + NUM_DATABASES;
+
+                    String receiverMessage = jobID + " | " + message +
+                            " | " + NUM_DATABASES;
                     channel.basicPublish("", PURPLE_QUEUE_OUTPUT,
                             MessageProperties.PERSISTENT_TEXT_PLAIN,
                             receiverMessage.getBytes("UTF-8"));
 
-
+                    jobID++;
 
                     System.out.println("Sent message to DataCollectionReceiver: " + receiverMessage);
 

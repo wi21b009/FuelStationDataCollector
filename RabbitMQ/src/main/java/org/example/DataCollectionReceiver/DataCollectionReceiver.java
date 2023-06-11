@@ -17,6 +17,9 @@ public class DataCollectionReceiver {
         factory.setHost("localhost");
         factory.setPort(30003);
 
+        // Little info
+        System.out.println("DataCollectionReceiver up and running");
+
         // Create a connection and channel
         try (Connection connection = factory.newConnection();
              Channel channel = connection.createChannel()) {
@@ -26,38 +29,51 @@ public class DataCollectionReceiver {
             // Declare the output queue
             channel.queueDeclare(OUTPUT_QUEUE_NAME, true, false, false, null);
 
-            DeliverCallback deliverCallback = (consumerTag, delivery) -> {
+            DeliverCallback deliverCallback1 = (consumerTag, delivery) -> {
                 try {
                     String message = new String(delivery.getBody(), "UTF-8");
+                    System.out.println("Received from DataCollectionDispatcher: " + message);
 
-                    System.out.println(" Received '" + message + "'");
+                    String[] input = message.split("\\|");
 
-                    // Modify the message by adding an 's'
-                    String modifiedMessage = message + "s";
+                    int JobID = Integer.parseInt(input[0].trim());
+                    int UserID = Integer.parseInt(input[1].trim());
+                    int numDB = Integer.parseInt(input[2].trim());
 
-                    // Publish the modified message to the output queue
-                    channel.basicPublish("", OUTPUT_QUEUE_NAME,
-                            MessageProperties.PERSISTENT_TEXT_PLAIN,
-                            modifiedMessage.getBytes("UTF-8"));
-
-                    System.out.println(" Modified message sent to Queue 2: '" + modifiedMessage + "'");
-
-                    // Acknowledge the message received from the input queue
                     channel.basicAck(delivery.getEnvelope().getDeliveryTag(), false);
+
+                    // Process the number of databases (numDB) using a for loop
+                    for (int i = 0; i < numDB; i++) {
+                        DeliverCallback deliverCallback2 = (consumerTag2, delivery2) -> {
+                            try {
+                                String message2 = new String(delivery2.getBody(), "UTF-8");
+                                System.out.println("Received from StationDataCollector: " + message2);
+
+                                StringSort.StationSort(message2);
+
+                                channel.basicAck(delivery2.getEnvelope().getDeliveryTag(), false);
+                            } catch (Exception ex) {
+                                System.err.println("Exception occurred during message delivery: " + ex.getMessage());
+                                ex.printStackTrace();
+                            }
+                        };
+
+                        boolean autoAck = false;
+                        channel.basicConsume(INPUT_QUEUE_NAME2, autoAck, deliverCallback2, consumerTag2 -> {});
+                    }
                 } catch (Exception ex) {
                     System.err.println("Exception occurred during message delivery: " + ex.getMessage());
                     ex.printStackTrace();
                 }
             };
 
-            // Create a consumer that waits for messages from the input queue
-            boolean autoAck = false; // Set autoAck to false to manually acknowledge messages
-            channel.basicConsume(INPUT_QUEUE_NAME1, autoAck, deliverCallback, consumerTag -> {});
+            boolean autoAck = false;
+            channel.basicConsume(INPUT_QUEUE_NAME1, autoAck, deliverCallback1, consumerTag -> {});
 
             // Keep the service running indefinitely
             while (true) {
                 try {
-                    Thread.sleep(1000); // Wait for 1 second before checking for new messages
+                    Thread.sleep(5000); // Wait for 5 seconds before checking for new messages
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }

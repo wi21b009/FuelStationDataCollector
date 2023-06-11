@@ -1,6 +1,6 @@
 package org.example.PDFGenerator;
 
-import org.example.Database;
+import org.example.*;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;

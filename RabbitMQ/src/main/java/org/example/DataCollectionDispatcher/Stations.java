@@ -50,7 +50,7 @@ public class Stations {
     //toString
     @Override
     public String toString() {
-        return "Station{" +
+        return "{" +
                 "id=" + id +
                 ", db_url='" + db_url + '\'' +
                 ", latitude=" + latitude +
