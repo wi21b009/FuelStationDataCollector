@@ -31,4 +31,8 @@ public class User {
                 ", lastName='" + lastName + '\'' +
                 '}';
     }
+
+    public String fnLn() {
+        return firstName + " " + lastName;
+    }
 }
