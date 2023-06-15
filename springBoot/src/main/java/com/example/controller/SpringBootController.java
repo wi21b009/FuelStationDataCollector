@@ -7,24 +7,23 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.io.IOException;
+import java.util.concurrent.TimeoutException;
+
 @RestController
 public class SpringBootController {
 
     @Autowired
     SpringBootService springBootService;
 
-    @PostMapping("/invoices1/{customerId}")
+    @PostMapping("/invoices/{customerId}")
     public void createInvoice(@PathVariable("customerId") Integer customerId) {
         springBootService.createPDF(customerId);
-        System.out.println("CreateInvoice startet with id: " + customerId);
-        //dataCollectionDispatcher.startDataGatheringJob(customerId);
     }
 
     @GetMapping("/invoices/{customerId}")
-    public String getInvoice(@PathVariable("customerId") Integer customerId) {
-        String path = springBootService.getPath(customerId);
-        System.out.println("getInvoice startet with id: " + customerId);
-        return "Path/x/y/test.PDF";
+    public String getInvoice(@PathVariable("customerId") Integer customerId) throws IOException, TimeoutException {
+        return springBootService.getPath(customerId);
     }
 
 }
