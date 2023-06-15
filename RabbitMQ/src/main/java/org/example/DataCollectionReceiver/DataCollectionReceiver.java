@@ -140,6 +140,7 @@ public class DataCollectionReceiver implements Receiver.MessageCallback {
 
                 //build together string
                 String collectedLine = "id = " + id + " | kwh = " + kwh + " | station = " + dbNum;
+                jobData.increaseTotal(kwh);
                 jobData.addLine(collectedLine);
             }
 

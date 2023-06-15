@@ -8,7 +8,7 @@ public class Main {
     public static void main(String[] args) throws Exception {
         try {
             Sender sender = new Sender("localhost", 30003);
-            sender.sendMessage("red", "1");
+            sender.sendMessage("red", "3");
             sender.close();
         } catch (Exception ex) {
             ex.printStackTrace();

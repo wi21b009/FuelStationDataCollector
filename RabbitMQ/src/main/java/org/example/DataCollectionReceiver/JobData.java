@@ -27,6 +27,10 @@ public class JobData {
         lines.add(line);
     }
 
+    public void increaseTotal(double kwH){
+        total+= kwH;
+    }
+
     public List<String> getLines() {
         return lines;
     }
@@ -41,6 +45,7 @@ public class JobData {
         for (String line : lines) {
             sb.append(line).append("\n");
         }
+        sb.append("\n Total kwh: ").append(total);
         return sb.toString();
     }
 
