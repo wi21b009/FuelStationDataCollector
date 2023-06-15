@@ -2,6 +2,7 @@ package org.example.PDFGenerator;
 
 import org.example.Database;
 import org.example.Receiver;
+import org.example.Sender;
 
 import java.io.IOException;
 import java.sql.Connection;
@@ -70,7 +71,26 @@ public class UserCollector implements Receiver.MessageCallback {
         pdfGenerator.addToQueue(message);
 
         // Process the queue and generate the PDFs
-        pdfGenerator.processQueue();
+        String path = pdfGenerator.processQueue();
+
+        //another break
+        Thread.sleep(3000);
+
+
+        try {
+            Sender sender = new Sender("localhost", 30003);
+            sender.sendMessage("black", path);
+            sender.close();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+
+        // Timeout
+        try {
+            Thread.sleep(2000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
 
     }
 
