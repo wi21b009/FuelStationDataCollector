@@ -2,6 +2,7 @@ package com.example.service;
 import com.rabbitmq.client.*;
 import org.springframework.stereotype.Service;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.concurrent.TimeoutException;
 
@@ -115,6 +116,14 @@ public class SpringBootServiceImpl implements SpringBootService {
             System.out.println("Wait ended");
         } catch (InterruptedException e) {
             e.printStackTrace();
+        }
+
+        //check if path exist!
+        File file = new File(messageWrapper.getValue());
+        //File file = new File("'D:\\Minor\\Distributed_Systems\\newVersion/customer3.pdf'");
+        if (!file.exists()) {
+            throw new IOException("Error: " + messageWrapper.getValue() + "not found");
+
         }
 
         return messageWrapper.getValue();
