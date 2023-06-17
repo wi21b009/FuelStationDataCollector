@@ -9,6 +9,9 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.concurrent.TimeoutException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -51,24 +54,37 @@ public class UserCollector implements Receiver.MessageCallback {
     public void onMessageReceived(String message) throws Exception {
         // Extract UserID value using regular expression
         Pattern pattern = Pattern.compile("UserID: (\\d+)");
+
         Matcher matcher = pattern.matcher(message);
-        int UserID = 0;
+        int userID = 0;
         if (matcher.find()) {
-            UserID = Integer.parseInt(matcher.group(1));
-            System.out.println("UserID: " + UserID);
+            userID = Integer.parseInt(matcher.group(1));
+            System.out.println("UserID: " + userID);
         } else {
             System.out.println("UserID not found in the string.");
         }
 
+        Pattern kwhPattern = Pattern.compile("Total kwh: (\\d+(\\.\\d+)?)");
+        Matcher matcher1 = kwhPattern.matcher(message);
+        double kwh = 0;
+        if (matcher1.find()){
+            kwh = Double.parseDouble(matcher1.group(1));
+            System.out.println("kwh: " + kwh);
+        } else {
+            System.out.println("kwh not found!");
+        }
         //query user data
-        User user = query(UserID);
-        System.out.println(user);
+        User user = query(userID);
+        System.out.println(userID);
 
-        PDFGeneratorController pdfGenerator = new PDFGeneratorController();
+
+        PDFGeneratorController pdfGenerator = new PDFGeneratorController(userID, kwh);
 
         // Add test data to the queue
         pdfGenerator.addToQueue(user.fnLn());
         pdfGenerator.addToQueue(message);
+        pdfGenerator.addToQueue(String.valueOf(user.getId()));
+        pdfGenerator.addToQueue(LocalDate.now(ZoneId.of("Europe/Berlin")).toString());
 
         // Process the queue and generate the PDFs
         String path = pdfGenerator.processQueue();
