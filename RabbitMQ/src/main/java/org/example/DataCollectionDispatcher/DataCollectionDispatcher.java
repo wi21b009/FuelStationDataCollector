@@ -1,87 +1,95 @@
 package org.example.DataCollectionDispatcher;
 
+import org.example.Receiver;
+import org.example.Sender;
 
-import com.rabbitmq.client.*;
-
+import java.io.IOException;
 import java.util.List;
+import java.util.concurrent.TimeoutException;
 
-public class DataCollectionDispatcher {
+public class DataCollectionDispatcher implements Receiver.MessageCallback {
 
-    private static final String RED_QUEUE_INPUT = "red";
-    private static final String GREEN_QUEUE_OUTPUT = "green";
-    private static final String PURPLE_QUEUE_OUTPUT = "purple";
     private static int NUM_DATABASES;
+    private static int jobID = 1000;
+    private static boolean newMessageReceived = false;
 
-    private static int jobID;
-
-    public static void main(String[] args) throws Exception {
-
-        jobID = 1000;
-
-        ConnectionFactory factory = new ConnectionFactory();
-        factory.setHost("localhost");
-        factory.setPort(30003);
-
-        //little info
+    public static void main(String[] args) {
+        // Info
         System.out.println("DataCollectionDispatcher up and running");
 
-        try (Connection connection = factory.newConnection();
-             Channel channel = connection.createChannel()) {
-
-            channel.queueDeclare(GREEN_QUEUE_OUTPUT, true, false, false, null);
-            channel.queueDeclare(PURPLE_QUEUE_OUTPUT, true, false, false, null);
-
-            DeliverCallback deliverCallback = (consumerTag, delivery) -> {
-                try {
-                    String message = new String(delivery.getBody(), "UTF-8");
-
-                    System.out.println("Received: " + message);
-
-                    NUM_DATABASES = StationsCollector.getNumDatabase();
-                    List<Stations> stationsList = StationsCollector.queryDatabase();
-
-                    for (Stations station : stationsList) {
-                        String stationMessage = message + " | " + station.toString() + " | " + jobID;
-
-                        channel.basicPublish("", GREEN_QUEUE_OUTPUT,
-                                MessageProperties.PERSISTENT_TEXT_PLAIN,
-                                stationMessage.getBytes("UTF-8"));
-
-                        System.out.println("Sent message to StationDataCollector: " + stationMessage);
-
-                        //do a little timeout
-                        Thread.sleep(2000);
-                    }
-
-
-
-                    String receiverMessage = jobID + " | " + message +
-                            " | " + NUM_DATABASES;
-                    channel.basicPublish("", PURPLE_QUEUE_OUTPUT,
-                            MessageProperties.PERSISTENT_TEXT_PLAIN,
-                            receiverMessage.getBytes("UTF-8"));
-
-                    jobID++;
-
-                    System.out.println("Sent message to DataCollectionReceiver: " + receiverMessage);
-
-                    channel.basicAck(delivery.getEnvelope().getDeliveryTag(), false);
-                } catch (Exception ex) {
-                    System.err.println("Exception occurred during message delivery: " + ex.getMessage());
-                    ex.printStackTrace();
-                }
-            };
-
-            boolean autoAck = false;
-            channel.basicConsume(RED_QUEUE_INPUT, autoAck, deliverCallback, consumerTag -> {});
+        // Create the receiver and continuously receive and process messages
+        Receiver receiver = null;
+        try {
+            receiver = new Receiver("localhost", 30003);
+            receiver.startReceiving("red", new DataCollectionDispatcher());
 
             while (true) {
                 try {
-                    Thread.sleep(5000);
+                    Thread.sleep(5000); // Wait for 5 seconds before checking for new messages
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
             }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (receiver != null) {
+                try {
+                    receiver.close();
+                } catch (IOException | TimeoutException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
+
+    @Override
+    public void onMessageReceived(String message) throws Exception {
+        newMessageReceived = true;
+        processMessage(message);
+    }
+
+    private static void processMessage(String message) throws Exception {
+        if (newMessageReceived) {
+            newMessageReceived = false;
+            // DB requests
+            NUM_DATABASES = StationsCollector.getNumDatabase();
+            List<Stations> stationsList = StationsCollector.queryDatabase();
+
+            // Output message to StationDataCollector
+            for (Stations station : stationsList) {
+                String stationMessage = message + " | " + station.toString() + " | " + jobID;
+
+                try {
+                    Sender sender = new Sender("localhost", 30003);
+                    sender.sendMessage("green", stationMessage);
+                    sender.close();
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+
+                // Timeout
+                try {
+                    Thread.sleep(2000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            // Output message to DataCollectionReceiver
+            String receiverMessage = jobID + " | " + message + " | " + NUM_DATABASES;
+
+            try {
+                Sender sender = new Sender("localhost", 30003);
+                sender.sendMessage("purple", receiverMessage);
+                sender.close();
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+
+            // Increase ID for the next job
+            jobID++;
         }
     }
 }

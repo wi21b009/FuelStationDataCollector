@@ -22,10 +22,12 @@ public class PDFGeneratorController {
         queue.add(text);
     }
 
-    public void processQueue() {
+    public String processQueue() {
         // PDF generation and saving of the PDF
         String pdfPath = generatePDF();
         System.out.println("PDF erstellt und gespeichert unter: " + pdfPath);
+
+        return pdfPath;
     }
 
     private String generatePDF() {
