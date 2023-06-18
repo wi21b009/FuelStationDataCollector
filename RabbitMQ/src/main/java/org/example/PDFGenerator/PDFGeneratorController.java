@@ -18,12 +18,17 @@ public class PDFGeneratorController {
 
     private Queue<String> queue;
     private Integer fileID;
-    private double kwh;
-    public PDFGeneratorController(Integer userID, double kwh) {
+    private User user;
+    public PDFGeneratorController(Integer userID, User user) {
         queue = new LinkedList<>();
         this.fileID = userID;
-        this.kwh = kwh;
+        this.user = user;
     }
+
+    public void setQueue(Queue<String> queue) {
+        this.queue = queue;
+    }
+
 
     public void addToQueue(String text) {
         queue.add(text);
@@ -37,11 +42,8 @@ public class PDFGeneratorController {
         return pdfPath;
     }
 
-    public String generatePDF() throws IOException {
+    /*public String generatePDF() throws IOException {
         //String filePath = System.getProperty("user.dir") +fileID+".pdf";
-        /*if (kwh == 0){
-
-        }*/
 
         String userDir = System.getProperty("user.dir");
         File file = new File(userDir);
@@ -75,8 +77,39 @@ public class PDFGeneratorController {
         }
 
         return filePath;
+    }*/
+
+    public String generatePDF() throws IOException {
+        String filePath = generateFilePath();
+        generatePdfDocument(filePath);
+        return filePath;
     }
 
+    private String generateFilePath() {
+        String userDir = System.getProperty("user.dir");
+        File file = new File(userDir);
+        String parentDir = file.getParent();
+        return parentDir + "/customer" + fileID + ".pdf";
+    }
 
+    private void generatePdfDocument(String filePath) throws IOException {
+        int counter = 0;
+        try (PdfWriter writer = new PdfWriter(filePath);
+             PdfDocument pdf = new PdfDocument(writer);
+             Document document = new Document(pdf)) {
+
+            while (!queue.isEmpty()) {
+                String text = queue.poll();
+                Paragraph paragraph = new Paragraph(text);
+                paragraph.setTextAlignment(TextAlignment.LEFT);
+                document.add(paragraph);
+                if (counter == 2) {
+                    fileID = Integer.parseInt(text);
+                    System.out.println(fileID);
+                }
+                counter++;
+            }
+        }
+    }
 }
 

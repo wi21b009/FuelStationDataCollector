@@ -26,6 +26,10 @@ public class User {
     public int getId(){
         return id;
     }
+
+    public String fnLn() {
+        return firstName + " " + lastName;
+    }
     @Override
     public String toString() {
         return "User{" +
@@ -35,7 +39,5 @@ public class User {
                 '}';
     }
 
-    public String fnLn() {
-        return firstName + " " + lastName;
-    }
+
 }

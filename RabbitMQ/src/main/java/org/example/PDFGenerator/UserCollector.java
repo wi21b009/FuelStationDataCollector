@@ -73,12 +73,16 @@ public class UserCollector implements Receiver.MessageCallback {
         } else {
             System.out.println("kwh not found!");
         }
+
+
         //query user data
         User user = query(userID);
-        System.out.println(userID);
+        System.out.println("User:" + user);
 
 
-        PDFGeneratorController pdfGenerator = new PDFGeneratorController(userID, kwh);
+
+
+        PDFGeneratorController pdfGenerator = new PDFGeneratorController(userID, user);
 
         // Add test data to the queue
         pdfGenerator.addToQueue(user.fnLn());
@@ -110,7 +114,7 @@ public class UserCollector implements Receiver.MessageCallback {
 
     }
 
-    private User query(int userID) throws SQLException {
+    public User query(int userID) throws SQLException {
         User user = null;
         Connection con = Database.getConnection(30001, "customerdb");
 
@@ -141,10 +145,3 @@ public class UserCollector implements Receiver.MessageCallback {
         return user;
     }
 }
-
-
-
-
-
-
-

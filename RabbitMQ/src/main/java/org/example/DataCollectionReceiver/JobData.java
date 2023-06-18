@@ -31,6 +31,10 @@ public class JobData {
         total+= kwH;
     }
 
+    public double getTotal() {
+        return total;
+    }
+
     public List<String> getLines() {
         return lines;
     }
