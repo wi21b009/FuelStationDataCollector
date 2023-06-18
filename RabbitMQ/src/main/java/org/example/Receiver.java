@@ -6,6 +6,8 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeoutException;
 
+//source: https://www.rabbitmq.com/getstarted.html
+
 public class Receiver {
     private ConnectionFactory factory;
     private Connection connection;

@@ -4,6 +4,8 @@ import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
 
+//source https://www.rabbitmq.com/getstarted.html
+
 public class Sender {
     private ConnectionFactory factory;
     private Connection connection;

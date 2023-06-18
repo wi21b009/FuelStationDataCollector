@@ -4,6 +4,8 @@ import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
 
+//source https://www.rabbitmq.com/getstarted.html
+
 public class Send {
     private final static String QUEUE_NAME = "hello";
     public static void main(String[] argv) throws Exception {

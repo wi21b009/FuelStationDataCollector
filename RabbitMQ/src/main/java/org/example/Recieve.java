@@ -5,6 +5,8 @@ import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
 import com.rabbitmq.client.DeliverCallback;
 
+//source https://www.rabbitmq.com/getstarted.html
+
 public class Recieve {
     private final static String QUEUE_NAME = "hello";
 
