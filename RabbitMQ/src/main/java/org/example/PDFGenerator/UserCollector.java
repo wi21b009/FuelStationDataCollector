@@ -10,7 +10,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.concurrent.TimeoutException;
 import java.util.regex.Matcher;
@@ -65,27 +64,32 @@ public class UserCollector implements Receiver.MessageCallback {
         }
 
         //query user data
+        String path = null;
         User user = query(userID);
         boolean validUser = true;
         if (user == null){
             validUser = false;
             String errorMessage = "User not found with ID: " + userID;
             System.err.println(errorMessage);
-            throw new Exception(errorMessage);
+            path = "Error";
         }
-        System.out.println("User:" + user);
 
-        PDFGeneratorController pdfGenerator = new PDFGeneratorController(userID, user);
+        if(validUser) {
+            System.out.println("User:" + user);
 
-        // Add test data to the queue
-        pdfGenerator.addToQueue(user.fnLn());
-        pdfGenerator.addToQueue(message);
-        pdfGenerator.addToQueue(String.valueOf(user.getId()));
-        pdfGenerator.addToQueue(LocalDate.now(ZoneId.of("Europe/Berlin")).toString());
-        pdfGenerator.addToQueue(String.valueOf(validUser));
+            PDFGeneratorController pdfGenerator = new PDFGeneratorController(userID, user);
 
-        // Process the queue and generate the PDFs
-        String path = pdfGenerator.processQueue();
+            // Add test data to the queue
+            pdfGenerator.addToQueue(user.fnLn());
+            pdfGenerator.addToQueue(message);
+            pdfGenerator.addToQueue(String.valueOf(user.getId()));
+            pdfGenerator.addToQueue(LocalDate.now(ZoneId.of("Europe/Berlin")).toString());
+            pdfGenerator.addToQueue(String.valueOf(validUser));
+
+            // Process the queue and generate the PDFs
+            path = pdfGenerator.processQueue();
+        }
+
 
         //another break
         Thread.sleep(3000);
