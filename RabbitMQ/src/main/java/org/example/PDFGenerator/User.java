@@ -30,6 +30,7 @@ public class User {
     public String fnLn() {
         return firstName + " " + lastName;
     }
+
     @Override
     public String toString() {
         return "User{" +

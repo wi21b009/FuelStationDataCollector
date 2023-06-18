@@ -24,28 +24,23 @@ public class PDFGeneratorControllerTest {
         User user = new User(1, "John", "Doe"); // Beispielwerte für den Konstruktor von User
         queue = new LinkedList<>();
         controller = new PDFGeneratorController(userID, user);
-        controller.setQueue(queue); // Setzen der Queue-Referenz in der PDFGeneratorController-Instanz
+        controller.setQueue(queue);
     }
 
     @Test
     public void testAddToQueue() {
-        // Arrange
         String text = "Test Text";
         controller.addToQueue(text);
 
-        // Act
         String actualText = queue.poll();
 
-        // Assert
         Assertions.assertEquals(text, actualText);
     }
 
     @Test
     public void testProcessQueue() {
-        // Arrange
         String expectedFilePath = "expected/path/to/pdf.pdf";
 
-        // Mocking generatePDF() method
         PDFGeneratorController controllerSpy = Mockito.spy(controller);
         try {
             Mockito.doReturn(expectedFilePath).when(controllerSpy).generatePDF();
@@ -53,7 +48,6 @@ public class PDFGeneratorControllerTest {
             e.printStackTrace();
         }
 
-        // Act
         String actualFilePath = null;
         try {
             actualFilePath = controllerSpy.processQueue();
@@ -61,33 +55,6 @@ public class PDFGeneratorControllerTest {
             e.printStackTrace();
         }
 
-        // Assert
         Assertions.assertEquals(expectedFilePath, actualFilePath);
     }
-
-
-   /*@Test
-    public void testProcessQueue() {
-        // Arrange
-        String expectedFilePath = "expected/path/to/pdf.pdf";
-
-        // Mocking generatePDF() method
-        PDFGeneratorController controllerSpy = Mockito.spy(controller);
-        try {
-            Mockito.doReturn(expectedFilePath).when(controllerSpy).generatePDF();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        // Act
-        String actualFilePath = null;
-        try {
-            actualFilePath = controllerSpy.processQueue();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        // Assert
-        Assertions.assertEquals(expectedFilePath, actualFilePath);
-    }*/
 }

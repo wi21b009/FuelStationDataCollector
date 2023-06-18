@@ -30,13 +30,10 @@ class SpringBootControllerTest {
     void createInvoice_PositiveTest() {
         Integer customerId = 1;
 
-        // Mocken der Aufrufe der SpringBootService-Methode
         doNothing().when(springBootService).createPDF(customerId);
 
-        // Methode aufrufen
         springBootController.createInvoice(customerId);
 
-        // Überprüfen, ob die Methode createPDF des SpringBootService aufgerufen wurde
         verify(springBootService, times(1)).createPDF(customerId);
     }
 
@@ -44,13 +41,9 @@ class SpringBootControllerTest {
     void createInvoice_NegativeTest() {
         Integer customerId = 1;
 
-        // Mocken der Aufrufe der SpringBootService-Methode, die eine Exception wirft
         doThrow(RuntimeException.class).when(springBootService).createPDF(customerId);
-
-        // Test durchführen und auf Exception überprüfen
         assertThrows(RuntimeException.class, () -> springBootController.createInvoice(customerId));
 
-        // Überprüfen, ob die Methode createPDF des SpringBootService aufgerufen wurde
         verify(springBootService, times(1)).createPDF(customerId);
     }
 
@@ -59,16 +52,12 @@ class SpringBootControllerTest {
         Integer customerId = 1;
         String expectedPath = "/path/to/invoice.pdf";
 
-        // Mocken der Aufrufe der SpringBootService-Methode
         when(springBootService.getPath(customerId)).thenReturn(expectedPath);
 
-        // Methode aufrufen
         String path = springBootController.getInvoice(customerId);
 
-        // Überprüfen, ob die Methode getPath des SpringBootService aufgerufen wurde
         verify(springBootService, times(1)).getPath(customerId);
 
-        // Überprüfen, ob der zurückgegebene Pfad dem erwarteten Pfad entspricht
         assertEquals(expectedPath, path);
     }
 
@@ -76,13 +65,10 @@ class SpringBootControllerTest {
     void getInvoice_NegativeTest() throws IOException, TimeoutException {
         Integer customerId = 1;
 
-        // Mocken der Aufrufe der SpringBootService-Methode, die eine Exception wirft
         when(springBootService.getPath(customerId)).thenThrow(IOException.class);
 
-        // Test durchführen und auf Exception überprüfen
         assertThrows(IOException.class, () -> springBootController.getInvoice(customerId));
 
-        // Überprüfen, ob die Methode getPath des SpringBootService aufgerufen wurde
         verify(springBootService, times(1)).getPath(customerId);
     }
 }

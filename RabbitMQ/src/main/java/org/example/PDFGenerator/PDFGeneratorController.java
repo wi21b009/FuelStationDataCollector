@@ -19,6 +19,8 @@ public class PDFGeneratorController {
     private Queue<String> queue;
     private Integer fileID;
     private User user;
+
+    boolean validResult = true;
     public PDFGeneratorController(Integer userID, User user) {
         queue = new LinkedList<>();
         this.fileID = userID;
@@ -35,53 +37,18 @@ public class PDFGeneratorController {
     }
 
     public String processQueue() throws IOException {
-        // PDF generation and saving of the PDF
-        String pdfPath = generatePDF();
-        System.out.println("PDF erstellt und gespeichert unter: " + pdfPath);
 
+        String pdfPath = generatePDF();
         return pdfPath;
     }
-
-    /*public String generatePDF() throws IOException {
-        //String filePath = System.getProperty("user.dir") +fileID+".pdf";
-
-        String userDir = System.getProperty("user.dir");
-        File file = new File(userDir);
-        String parentDir = file.getParent();
-        String filePath = parentDir + "/customer" +  fileID + ".pdf";
-
-        int counter = 0;
-        //String filePath = System.getProperty("user.dir");
-        try {
-            PdfWriter writer = new PdfWriter(filePath);
-            PdfDocument pdf = new PdfDocument(writer);
-            Document document = new Document(pdf);
-
-            while (!queue.isEmpty()) {
-                String text = queue.poll();
-                Paragraph paragraph = new Paragraph(text);
-                paragraph.setTextAlignment(TextAlignment.LEFT);
-                document.add(paragraph);
-                if (counter==2){
-                    fileID = Integer.parseInt(text);
-                    System.out.println(fileID);
-                }
-                counter++;
-            }
-
-
-            document.close();
-            writer.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        return filePath;
-    }*/
 
     public String generatePDF() throws IOException {
         String filePath = generateFilePath();
         generatePdfDocument(filePath);
+
+        if (validResult = false){
+            return "Wrong ID!";
+        }
         return filePath;
     }
 
@@ -105,7 +72,9 @@ public class PDFGeneratorController {
                 document.add(paragraph);
                 if (counter == 2) {
                     fileID = Integer.parseInt(text);
-                    System.out.println(fileID);
+                }
+                if (counter == 5 && Boolean.parseBoolean(text) == false){
+                    validResult = false;
                 }
                 counter++;
             }

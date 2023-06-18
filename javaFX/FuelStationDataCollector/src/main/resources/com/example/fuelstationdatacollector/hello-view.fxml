@@ -21,7 +21,6 @@
                   <Button fx:id="Commit" mnemonicParsing="false" onAction="#onClickCommit" text="Commit" />
                </children>
             </HBox>
-            <ProgressBar fx:id="progressBar" prefWidth="200.0" progress="0.0" />
          </children>
          <opaqueInsets>
             <Insets />

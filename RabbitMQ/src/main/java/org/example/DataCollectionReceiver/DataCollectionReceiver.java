@@ -14,6 +14,7 @@ public class DataCollectionReceiver implements Receiver.MessageCallback {
     private static final String OUTPUT_QUEUE_NAME = "yellow";
 
     public static void main(String[] args) throws Exception {
+
         // Info
         System.out.println("DataCollectionReceiver up and running");
 

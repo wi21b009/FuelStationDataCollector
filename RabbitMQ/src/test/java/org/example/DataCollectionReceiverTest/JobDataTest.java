@@ -75,19 +75,14 @@ public class JobDataTest {
 
     @Test
     public void testIncrementCounter() {
-        // Create a new JobData instance
         JobData jobData = new JobData(1, 1, 1);
 
-        // Get the initial counter value
         int initialCounter = jobData.getCounter();
 
-        // Call the incrementCounter() method
         jobData.incrementCounter();
 
-        // Get the updated counter value
         int updatedCounter = jobData.getCounter();
 
-        // Assert that the counter value has increased by 1
         Assert.assertEquals(initialCounter + 1, updatedCounter);
     }
 }

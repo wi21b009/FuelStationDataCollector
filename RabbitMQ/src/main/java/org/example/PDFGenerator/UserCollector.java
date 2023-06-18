@@ -54,8 +54,8 @@ public class UserCollector implements Receiver.MessageCallback {
     public void onMessageReceived(String message) throws Exception {
         // Extract UserID value using regular expression
         Pattern pattern = Pattern.compile("UserID: (\\d+)");
-
         Matcher matcher = pattern.matcher(message);
+
         int userID = 0;
         if (matcher.find()) {
             userID = Integer.parseInt(matcher.group(1));
@@ -64,23 +64,16 @@ public class UserCollector implements Receiver.MessageCallback {
             System.out.println("UserID not found in the string.");
         }
 
-        Pattern kwhPattern = Pattern.compile("Total kwh: (\\d+(\\.\\d+)?)");
-        Matcher matcher1 = kwhPattern.matcher(message);
-        double kwh = 0;
-        if (matcher1.find()){
-            kwh = Double.parseDouble(matcher1.group(1));
-            System.out.println("kwh: " + kwh);
-        } else {
-            System.out.println("kwh not found!");
-        }
-
-
         //query user data
         User user = query(userID);
+        boolean validUser = true;
+        if (user == null){
+            validUser = false;
+            String errorMessage = "User not found with ID: " + userID;
+            System.err.println(errorMessage);
+            throw new Exception(errorMessage);
+        }
         System.out.println("User:" + user);
-
-
-
 
         PDFGeneratorController pdfGenerator = new PDFGeneratorController(userID, user);
 
@@ -89,6 +82,7 @@ public class UserCollector implements Receiver.MessageCallback {
         pdfGenerator.addToQueue(message);
         pdfGenerator.addToQueue(String.valueOf(user.getId()));
         pdfGenerator.addToQueue(LocalDate.now(ZoneId.of("Europe/Berlin")).toString());
+        pdfGenerator.addToQueue(String.valueOf(validUser));
 
         // Process the queue and generate the PDFs
         String path = pdfGenerator.processQueue();
